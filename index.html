@@ -871,8 +871,8 @@
             <span class="badge badge-built">[ Built ]</span>
           </div>
           <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Affiliate Network</h3>
-          <div class="font-mono text-[11px] text-moss mb-3">15% · 10% · 8%</div>
-          <p class="text-bone/65 text-[13px] leading-relaxed">Commission resale — single sale, recurring, and bulk wholesale tiers.</p>
+          <div class="font-mono text-[11px] text-moss mb-3">5% · 10% · 15%</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Volume tiers by quarterly sales count — resets every 3 months.</p>
         </div>
         <!-- R04 -->
         <div class="channel-card panel p-6">
@@ -1138,52 +1138,59 @@
         <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[05]</span>
         <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Affiliate Calculator</h2>
       </div>
-      <p class="text-muted text-sm mb-7 font-light">Three tiers. One commission engine. Real numbers for real partners.</p>
+      <p class="text-muted text-sm mb-7 font-light">Three volume tiers — 5%, 10%, and 15% commission by sales count. Resets every 3 months.</p>
 
       <div class="panel">
         <div class="panel-header px-4 sm:px-6 py-4 border-b border-border flex justify-between items-center">
-          <div class="tab-group">
-            <button data-rate="0.15" data-tier="single" class="aff-tab tab tab-active">SINGLE · 15%</button>
-            <button data-rate="0.10" data-tier="recurring" class="aff-tab tab">RECURRING · 10%</button>
-            <button data-rate="0.08" data-tier="bulk" class="aff-tab tab">BULK · 8%</button>
-          </div>
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Quarterly Commission · Live</div>
           <span class="font-mono text-[10px] text-muted hidden md:flex items-center gap-2"><span class="live-dot"></span>LIVE</span>
         </div>
         <div class="grid lg:grid-cols-2 gap-0">
-          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border">
+          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border space-y-5">
             <div>
-              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Sales Volume (USD)</label>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Sales This Quarter (count)</label>
+              <input type="number" id="aff-sales" min="0" step="1" value="25"/>
+              <div class="mt-3 grid gap-2 font-mono text-[10.5px]">
+                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">1 – 50 sales</span><span class="text-moss">5% commission</span></div>
+                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">51 – 99 sales</span><span class="text-moss">10% commission</span></div>
+                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">100+ sales</span><span class="text-moss">15% commission</span></div>
+              </div>
+              <div class="mt-2 font-mono text-[10.5px] text-muted">Active tier: <span id="aff-tier-label" class="text-bone">1 – 50 · 5%</span></div>
+              <div class="font-mono text-[10.5px] text-gold/90 mt-1">↻ Tier resets every 3 months · <span id="aff-reset-label">next reset</span></div>
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Revenue to Commission (USD)</label>
               <input type="number" id="aff-volume" min="0" step="100" value="10000"/>
             </div>
-            <div class="mt-5">
+            <div>
               <input type="range" id="aff-slider" min="0" max="500000" step="500" value="10000"/>
               <div class="flex justify-between mt-2 font-mono text-[10px] text-muted tracking-wider">
                 <span>$0</span><span>$250K</span><span>$500K</span>
               </div>
             </div>
-            <div class="mt-6 grid grid-cols-3 gap-2 font-mono text-[10.5px]">
-              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="10000">$10K</button>
-              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="50000">$50K</button>
-              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="100000">$100K</button>
+            <div class="grid grid-cols-3 gap-2 font-mono text-[10.5px]">
+              <button class="aff-preset-sales border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-sales="25">25 sales</button>
+              <button class="aff-preset-sales border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-sales="75">75 sales</button>
+              <button class="aff-preset-sales border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-sales="120">120 sales</button>
             </div>
           </div>
           <div class="p-6 lg:p-8 bg-bg/40">
             <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-3">// Commission Earned</div>
             <div class="flex items-baseline gap-2">
-              <span id="aff-result" class="stat-num text-5xl lg:text-6xl text-moss num">$1,500</span>
+              <span id="aff-result" class="stat-num text-5xl lg:text-6xl text-moss num">$500</span>
             </div>
-            <div class="font-mono text-[11px] text-muted mt-3 tracking-wider" id="aff-detail">15% OF $10,000 SALES VOLUME</div>
+            <div class="font-mono text-[11px] text-muted mt-3 tracking-wider" id="aff-detail">5% OF $10,000 REVENUE · 25 SALES THIS QTR</div>
             <div class="mt-6 border-t border-border pt-5 space-y-2 font-mono text-[12px]">
-              <div class="flex justify-between"><span class="text-muted">Net to MOSSKYN</span><span id="aff-net" class="text-bone num">$8,500</span></div>
-              <div class="flex justify-between"><span class="text-muted">Tier</span><span id="aff-tier-label" class="text-bone">Single Sale</span></div>
-              <div class="flex justify-between"><span class="text-muted">Effective Rate</span><span id="aff-rate-label" class="text-moss">15.00 %</span></div>
+              <div class="flex justify-between"><span class="text-muted">Net to MOSSKYN</span><span id="aff-net" class="text-bone num">$9,500</span></div>
+              <div class="flex justify-between"><span class="text-muted">Sales (QTD)</span><span id="aff-sales-label" class="text-bone">25</span></div>
+              <div class="flex justify-between"><span class="text-muted">Effective Rate</span><span id="aff-rate-label" class="text-moss">5.00 %</span></div>
             </div>
           </div>
         </div>
 
         <!-- Stacked benchmarks -->
         <div class="border-t border-border p-6 lg:p-8">
-          <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-5">// Benchmark · Commission Across Tiers</div>
+          <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-5">// Benchmark · $10K revenue by tier</div>
           <div class="chart-wrap chart-wrap--short h-[180px] sm:h-[220px]"><canvas id="affChart"></canvas></div>
         </div>
       </div>
@@ -1953,45 +1960,63 @@
   /* ============================================================
      [05] AFFILIATE CALCULATOR
      ============================================================ */
+  const affSales = document.getElementById('aff-sales');
   const affVolume = document.getElementById('aff-volume');
   const affSlider = document.getElementById('aff-slider');
   const affResult = document.getElementById('aff-result');
   const affNet = document.getElementById('aff-net');
   const affDetail = document.getElementById('aff-detail');
   const affTierLabel = document.getElementById('aff-tier-label');
+  const affSalesLabel = document.getElementById('aff-sales-label');
   const affRateLabel = document.getElementById('aff-rate-label');
-  let affRate = 0.15;
-  let affTier = 'Single Sale';
+  const affResetLabel = document.getElementById('aff-reset-label');
 
-  function updateAffiliate() {
-    const v = parseFloat(affVolume.value) || 0;
-    const commission = v * affRate;
-    affResult.textContent = '$' + Math.round(commission).toLocaleString('en-US');
-    affNet.textContent = '$' + Math.round(v - commission).toLocaleString('en-US');
-    affDetail.textContent = `${(affRate*100).toFixed(0)}% OF $${v.toLocaleString('en-US')} SALES VOLUME`;
-    affTierLabel.textContent = affTier;
-    affRateLabel.textContent = (affRate*100).toFixed(2) + ' %';
+  function getAffiliateTier(salesCount) {
+    const n = parseInt(salesCount, 10) || 0;
+    if (n >= 100) return { rate: 0.15, label: '100+ · 15%', range: '100+ sales' };
+    if (n > 50) return { rate: 0.10, label: '51 – 99 · 10%', range: '51 – 99 sales' };
+    return { rate: 0.05, label: '1 – 50 · 5%', range: '1 – 50 sales' };
   }
 
-  document.querySelectorAll('.aff-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.aff-tab').forEach(b => b.classList.remove('tab-active'));
-      btn.classList.add('tab-active');
-      affRate = parseFloat(btn.dataset.rate);
-      affTier = btn.dataset.tier === 'single' ? 'Single Sale' : btn.dataset.tier === 'recurring' ? 'Recurring' : 'Bulk Wholesale';
-      updateAffiliate();
-    });
-  });
+  function getNextQuarterResetLabel() {
+    const now = new Date();
+    const month = now.getUTCMonth();
+    const year = now.getUTCFullYear();
+    const nextQMonth = Math.floor(month / 3) * 3 + 3;
+    let resetYear = year;
+    let resetMonth = nextQMonth;
+    if (nextQMonth >= 12) {
+      resetMonth = 0;
+      resetYear += 1;
+    }
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[resetMonth] + ' 1, ' + resetYear;
+  }
 
+  function updateAffiliate() {
+    const sales = parseInt(affSales.value, 10) || 0;
+    const revenue = parseFloat(affVolume.value) || 0;
+    const tier = getAffiliateTier(sales);
+    const commission = revenue * tier.rate;
+    affResult.textContent = '$' + Math.round(commission).toLocaleString('en-US');
+    affNet.textContent = '$' + Math.round(revenue - commission).toLocaleString('en-US');
+    affDetail.textContent = `${(tier.rate * 100).toFixed(0)}% OF $${revenue.toLocaleString('en-US')} REVENUE · ${sales.toLocaleString('en-US')} SALES THIS QTR`;
+    affTierLabel.textContent = tier.label;
+    affSalesLabel.textContent = sales.toLocaleString('en-US');
+    affRateLabel.textContent = (tier.rate * 100).toFixed(2) + ' %';
+    if (affResetLabel) affResetLabel.textContent = getNextQuarterResetLabel();
+  }
+
+  affSales.addEventListener('input', updateAffiliate);
   affVolume.addEventListener('input', () => { affSlider.value = Math.min(affVolume.value, 500000); updateAffiliate(); });
   affSlider.addEventListener('input', () => { affVolume.value = affSlider.value; updateAffiliate(); });
-  document.querySelectorAll('.aff-preset').forEach(b => {
+  document.querySelectorAll('.aff-preset-sales').forEach(b => {
     b.addEventListener('click', () => {
-      affVolume.value = b.dataset.val;
-      affSlider.value = Math.min(b.dataset.val, 500000);
+      affSales.value = b.dataset.sales;
       updateAffiliate();
     });
   });
+  updateAffiliate();
 
   /* Affiliate stacked bar chart */
   const affCtx = document.getElementById('affChart').getContext('2d');
@@ -1999,12 +2024,13 @@
   const affChart = new Chart(affCtx, {
     type: 'bar',
     data: {
-      labels: ['$10,000 Sales', '$50,000 Sales', '$100,000 Sales'],
-      datasets: [
-        { label: 'Single 15%', data: [1500, 7500, 15000], backgroundColor: chartTheme.moss, borderRadius: 2 },
-        { label: 'Recurring 10%', data: [1000, 5000, 10000], backgroundColor: chartTheme.gold, borderRadius: 2 },
-        { label: 'Bulk 8%', data: [800, 4000, 8000], backgroundColor: chartTheme.slate, borderRadius: 2 },
-      ]
+      labels: ['5% · 1–50', '10% · 51–99', '15% · 100+'],
+      datasets: [{
+        label: 'Commission on $10K revenue',
+        data: [500, 1000, 1500],
+        backgroundColor: [chartTheme.moss, chartTheme.gold, chartTheme.slate],
+        borderRadius: 2,
+      }]
     },
     options: {
       responsive: true,
