@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MOSSKYN · Business Model Terminal v1.0</title>
+<script>
+  (function () {
+    var saved = localStorage.getItem('mosskyn-theme');
+    document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--color-bg)',
+          surface: 'var(--color-surface)',
+          surface2: 'var(--color-surface2)',
+          border: 'var(--color-border)',
+          border2: 'var(--color-border2)',
+          moss: 'var(--color-moss)',
+          mossDark: 'var(--color-moss-dark)',
+          bone: 'var(--color-bone)',
+          muted: 'var(--color-muted)',
+          gold: 'var(--color-gold)',
+          slate: 'var(--color-slate)',
+          neg: 'var(--color-neg)',
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          display: ['"Space Grotesk"', 'Inter', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root,
+  [data-theme="light"] {
+    --color-bg: #f4f3ed;
+    --color-surface: #ffffff;
+    --color-surface2: #ecebe4;
+    --color-border: #d8d6cc;
+    --color-border2: #c5c3b8;
+    --color-moss: #5d7848;
+    --color-moss-dark: #4a6239;
+    --color-bone: #1c1e18;
+    --color-muted: #6b6e65;
+    --color-gold: #9a7d4a;
+    --color-slate: #556b7a;
+    --color-neg: #a85f5f;
+    --color-input-bg: #faf9f6;
+    --color-nav-active-bg: rgba(93, 120, 72, 0.1);
+    --color-grid-line: rgba(93, 120, 72, 0.08);
+    --color-scanline: rgba(28, 30, 24, 0.025);
+    --color-shadow: rgba(28, 30, 24, 0.08);
+    --color-backdrop: rgba(28, 30, 24, 0.45);
+    --color-kpi-hover: rgba(93, 120, 72, 0.08);
+    --color-tab-active-border: #b8c9a8;
+    --color-range-track: #d8d6cc;
+    --color-range-thumb-border: #f4f3ed;
+    --color-ascii: #d8d6cc;
+  }
+
+  [data-theme="dark"] {
+    --color-bg: #0a0c0a;
+    --color-surface: #12150f;
+    --color-surface2: #171a13;
+    --color-border: #1d2118;
+    --color-border2: #262a20;
+    --color-moss: #7a9b5e;
+    --color-moss-dark: #5d7848;
+    --color-bone: #e8e3d3;
+    --color-muted: #8a8d83;
+    --color-gold: #c9a96e;
+    --color-slate: #6b8294;
+    --color-neg: #a85f5f;
+    --color-input-bg: #0a0c0a;
+    --color-nav-active-bg: rgba(122, 155, 94, 0.08);
+    --color-grid-line: rgba(122, 155, 94, 0.04);
+    --color-scanline: rgba(232, 227, 211, 0.012);
+    --color-shadow: rgba(0, 0, 0, 0.4);
+    --color-backdrop: rgba(0, 0, 0, 0.55);
+    --color-kpi-hover: rgba(122, 155, 94, 0.12);
+    --color-tab-active-border: #2d3424;
+    --color-range-track: #1d2118;
+    --color-range-thumb-border: #0a0c0a;
+    --color-ascii: #1d2118;
+  }
+
+  html { scroll-behavior: smooth; }
+  html, body {
+    width: 100%;
+    max-width: 100%;
+  }
+  html {
+    overflow-x: clip;
+  }
+  body {
+    overflow-x: clip;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-bone);
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'tnum' on, 'cv11' on;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 2.25rem;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  body.nav-open { overflow: hidden; }
+
+  .main-grid {
+    width: 100%;
+    min-width: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .main-grid {
+      display: block;
+    }
+    .main-grid > main {
+      margin-left: 260px;
+      width: calc(100% - 260px);
+    }
+  }
+
+  main {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+  }
+
+  .chart-wrap canvas {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  /* Subtle grid background */
+  .grid-bg {
+    background-image:
+      linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Scanline overlay */
+  .scanlines::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2px,
+      var(--color-scanline) 2px,
+      var(--color-scanline) 3px
+    );
+    pointer-events: none;
+  }
+
+  /* Cursor blink */
+  .cursor::after {
+    content: '▋';
+    color: var(--color-moss);
+    margin-left: 6px;
+    animation: blink 1.1s steps(2, start) infinite;
+    font-weight: 400;
+  }
+  @keyframes blink { to { visibility: hidden; } }
+
+  /* Fade up on scroll */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Section divider */
+  .ascii-rule {
+    color: var(--color-ascii);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.05em;
+    user-select: none;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Active nav glow */
+  .nav-active {
+    border-left-color: var(--color-moss) !important;
+    background: linear-gradient(90deg, var(--color-nav-active-bg), transparent);
+    color: var(--color-bone) !important;
+  }
+  .nav-active .nav-code { color: var(--color-moss); }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border: 1px solid;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .badge-live    { color: var(--color-moss); border-color: rgba(93,120,72,0.4); background: rgba(93,120,72,0.08); }
+  .badge-active  { color: var(--color-gold); border-color: rgba(154,125,74,0.4); background: rgba(154,125,74,0.08); }
+  .badge-built   { color: var(--color-slate); border-color: rgba(85,107,122,0.4); background: rgba(85,107,122,0.08); }
+  .badge-planned { color: var(--color-muted); border-color: rgba(107,110,101,0.35); background: rgba(107,110,101,0.06); }
+  .badge-ongoing { color: var(--color-moss); border-color: rgba(93,120,72,0.4); background: rgba(93,120,72,0.08); }
+  .badge-asset   { color: var(--color-gold); border-color: rgba(154,125,74,0.4); background: rgba(154,125,74,0.08); }
+  .badge-phase2  { color: var(--color-slate); border-color: rgba(85,107,122,0.4); background: rgba(85,107,122,0.08); }
+
+  /* Panel */
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    position: relative;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  .panel:hover { border-color: var(--color-border2); }
+
+  /* Spec sheet rows */
+  .spec-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 10px 14px;
+    border-bottom: 1px dashed var(--color-border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+  .spec-row:last-child { border-bottom: 0; }
+  .spec-row .k { color: var(--color-muted); letter-spacing: 0.05em; }
+  .spec-row .v { color: var(--color-bone); font-weight: 500; }
+
+  /* Tab style */
+  .tab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 10px 14px;
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-bottom: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    background: transparent;
+  }
+  .tab:hover { color: var(--color-bone); }
+  .tab-active {
+    color: var(--color-moss);
+    border-color: var(--color-tab-active-border);
+    background: var(--color-surface);
+    box-shadow: inset 0 2px 0 var(--color-moss);
+  }
+
+  /* Inputs */
+  input[type="number"], input[type="range"], select {
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-bone);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 9px 12px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s, background-color 0.25s ease, color 0.25s ease;
+    width: 100%;
+  }
+  input[type="number"]:focus, select:focus { border-color: var(--color-moss); }
+  input[type="range"] {
+    -webkit-appearance: none;
+    padding: 0;
+    height: 4px;
+    background: var(--color-range-track);
+    border: 0;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: var(--color-moss);
+    border-radius: 50%;
+    border: 2px solid var(--color-range-thumb-border);
+    box-shadow: 0 0 8px rgba(93, 120, 72, 0.35);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    background: var(--color-moss);
+    border-radius: 50%;
+    border: 2px solid var(--color-range-thumb-border);
+    cursor: pointer;
+  }
+
+  /* Ticker */
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-track {
+    display: inline-flex;
+    animation: tickerScroll 60s linear infinite;
+    white-space: nowrap;
+  }
+
+  /* Glow ring on KPI hover */
+  .kpi-tile {
+    transition: all 0.25s ease;
+  }
+  .kpi-tile:hover {
+    border-color: var(--color-border2);
+    box-shadow: 0 0 0 1px var(--color-kpi-hover), inset 0 0 60px rgba(93, 120, 72, 0.03);
+  }
+
+  /* Mosskyn logo glow */
+  .logo-glow {
+    filter: drop-shadow(0 0 6px rgba(93, 120, 72, 0.35));
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-border2); }
+
+  /* Channel card hover */
+  .channel-card {
+    transition: all 0.2s ease;
+  }
+  .channel-card:hover {
+    border-color: var(--color-border2);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--color-shadow);
+  }
+
+  /* Animated counter style */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' on;
+  }
+
+  /* Tooltips for ascii rule */
+  .ascii-line {
+    display: block;
+    color: var(--color-ascii);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* Funnel rectangles */
+  .funnel-row {
+    border: 1px solid;
+    padding: 28px 24px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.3s ease;
+  }
+  .funnel-row:hover { transform: scale(1.01); }
+
+  /* Phase pill */
+  .phase-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Timeline node */
+  .timeline-node {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  /* Tab groups */
+  .tab-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background-color 0.25s ease;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover {
+    color: var(--color-bone);
+    border-color: var(--color-border2);
+  }
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  [data-theme="light"] .theme-icon-dark { display: none; }
+  [data-theme="dark"] .theme-icon-light { display: none; }
+
+  /* Burger menu */
+  .burger-btn {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.25s ease;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .burger-btn:hover { border-color: var(--color-border2); }
+  .burger-line {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--color-bone);
+    transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease;
+  }
+  .burger-btn[aria-expanded="true"] .burger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .burger-btn[aria-expanded="true"] .burger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .burger-btn[aria-expanded="true"] .burger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Nav backdrop */
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    top: 3.5rem;
+    background: var(--color-backdrop);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 55;
+  }
+  .nav-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Desktop sticky sidebar */
+  @media (min-width: 1024px) {
+    #sidebar {
+      position: fixed;
+      top: 3.5rem;
+      left: 0;
+      width: 260px;
+      height: calc(100vh - 3.5rem);
+      height: calc(100dvh - 3.5rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      z-index: 40;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      -webkit-overflow-scrolling: touch;
+    }
+    #sidebar .mobile-nav-label {
+      display: none;
+    }
+    #sidebar nav {
+      max-height: none !important;
+      overflow: visible !important;
+      padding-top: 1.5rem !important;
+      padding-bottom: 1.5rem !important;
+    }
+    .nav-backdrop { display: none; }
+  }
+
+  /* Mobile off-canvas drawer */
+  @media (max-width: 1023px) {
+    .main-grid > main {
+      margin-left: 0;
+      width: 100%;
+    }
+    #sidebar {
+      position: fixed !important;
+      top: 3.5rem;
+      left: 0;
+      bottom: 0;
+      width: min(300px, 88vw);
+      height: auto !important;
+      max-height: none !important;
+      transform: translateX(-105%);
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 60;
+      border-right: 1px solid var(--color-border) !important;
+      border-bottom: 0 !important;
+      background: var(--color-surface) !important;
+      box-shadow: 8px 0 32px var(--color-shadow);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #sidebar.open {
+      transform: translateX(0);
+    }
+    #sidebar nav {
+      display: block;
+      max-height: none !important;
+      overflow: visible !important;
+      padding: 1rem 0.75rem 1.5rem !important;
+    }
+    #sidebar nav a {
+      border-left: 2px solid transparent !important;
+      border-radius: 2px;
+      padding: 11px 12px !important;
+      font-size: 11px !important;
+    }
+    #sidebar .mobile-nav-label {
+      display: block;
+      padding: 0 12px 10px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--color-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+    }
+    #sidebar .sidebar-status {
+      display: block;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+    .main-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .funnel-nested {
+      width: 100% !important;
+    }
+    .spec-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 10px 12px;
+    }
+    .spec-row .v {
+      text-align: left;
+    }
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 0.75rem;
+    }
+    .data-table {
+      min-width: 520px;
+    }
+    .hero-meta {
+      text-align: left !important;
+    }
+    .chart-wrap--tall { min-height: 240px; }
+    .chart-wrap--medium { min-height: 200px; }
+    .chart-wrap--short { min-height: 180px; }
+  }
+
+  @media (max-width: 639px) {
+    section[id^="sec-"] { scroll-margin-top: 72px; }
+    .kpi-tile:nth-child(odd) { border-right: 0 !important; }
+    .stat-num.text-5xl,
+    .stat-num.text-6xl,
+    #aff-result,
+    #ex-output {
+      font-size: 2.25rem !important;
+      line-height: 1.1;
+    }
+    .stat-num.text-4xl { font-size: 1.875rem !important; }
+    .stat-num.text-3xl { font-size: 1.5rem !important; }
+    .funnel-row {
+      padding: 20px 16px;
+    }
+    .tab {
+      font-size: 9px;
+      padding: 8px 10px;
+      letter-spacing: 0.06em;
+    }
+    .breakeven-stats {
+      grid-template-columns: 1fr !important;
+    }
+    .preset-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .ascii-line { display: none; }
+    .panel[class*="p-"] {
+      padding: 1.25rem !important;
+    }
+  }
+
+  /* Subtle pulse for live dot */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(93, 120, 72, 0.55); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(93, 120, 72, 0); }
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--color-moss);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* SVG line drawing for "M" mark */
+  .m-mark path {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: draw 1.8s ease forwards;
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* Section anchor offset */
+  section[id^="sec-"] { scroll-margin-top: 80px; }
+
+  /* Number animation: just style */
+  .stat-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+</style>
+</head>
+<body class="min-h-screen w-full">
+
+<!-- ============ TOP HEADER ============ -->
+<header class="sticky top-0 z-50 bg-bg/95 backdrop-blur border-b border-border w-full transition-colors duration-200">
+  <div class="flex items-center justify-between gap-3 px-4 sm:px-5 lg:px-8 h-14 w-full">
+    <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+      <button id="nav-toggle" type="button" class="burger-btn lg:hidden" aria-expanded="false" aria-controls="sidebar" aria-label="Open navigation menu">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
+      <!-- Logo SVG -->
+      <a href="#sec-overview" class="flex items-center gap-3 logo-glow min-w-0">
+        <svg class="m-mark shrink-0" width="28" height="28" viewBox="0 0 40 40" fill="none">
+          <path d="M5 32 L5 8 L20 24 L35 8 L35 32" stroke="#7a9b5e" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+          <circle cx="20" cy="24" r="1.8" fill="#7a9b5e"/>
+        </svg>
+        <span class="font-mono text-bone text-[15px] tracking-[0.18em] font-semibold truncate">MOSSKYN</span>
+      </a>
+      <span class="hidden md:inline text-border2">|</span>
+      <span class="hidden md:inline font-mono text-[10px] tracking-[0.2em] text-muted uppercase">Business Model Terminal v1.0</span>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <button id="theme-toggle" type="button" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="hidden sm:flex items-center gap-2">
+        <span class="live-dot"></span>
+        <span class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase">Live</span>
+      </div>
+      <span id="clock" class="font-mono text-[10px] sm:text-[11px] text-bone tabular-nums tracking-wider whitespace-nowrap">00:00:00 UTC</span>
+      <span class="hidden lg:inline font-mono text-[10px] tracking-[0.2em] text-muted uppercase">Powered by Brandntions · MIA</span>
+    </div>
+  </div>
+</header>
+
+<div id="nav-backdrop" class="nav-backdrop lg:hidden" aria-hidden="true"></div>
+
+<!-- ============ MAIN GRID ============ -->
+<div class="main-grid w-full min-w-0">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar" class="border-r border-border bg-surface lg:bg-surface w-full shrink-0">
+    <nav id="sidebar-nav" class="py-6 px-2">
+      <div class="mobile-nav-label lg:hidden">Navigation · 10 Modules</div>
+      <div class="px-4 mb-4 hidden lg:block">
+        <div class="font-mono text-[9px] tracking-[0.25em] text-muted uppercase">Modules</div>
+      </div>
+      <a href="#sec-overview"   data-target="sec-overview"   class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[01]</span> OVERVIEW</a>
+      <a href="#sec-revenue"    data-target="sec-revenue"    class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[02]</span> REVENUE</a>
+      <a href="#sec-financials" data-target="sec-financials" class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[03]</span> FINANCIALS</a>
+      <a href="#sec-pricing"    data-target="sec-pricing"    class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[04]</span> PRICING</a>
+      <a href="#sec-affiliate"  data-target="sec-affiliate"  class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[05]</span> AFFILIATE</a>
+      <a href="#sec-franchise"  data-target="sec-franchise"  class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[06]</span> FRANCHISE</a>
+      <a href="#sec-market"     data-target="sec-market"     class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[07]</span> MARKET</a>
+      <a href="#sec-roadmap"    data-target="sec-roadmap"    class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[08]</span> ROADMAP</a>
+      <a href="#sec-roots"      data-target="sec-roots"      class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[09]</span> ROOTS</a>
+      <a href="#sec-exit"       data-target="sec-exit"       class="nav-item block border-l-2 border-transparent pl-4 pr-3 py-2.5 font-mono text-[12px] tracking-wider text-muted hover:text-bone transition-colors"><span class="nav-code text-muted">[10]</span> EXIT</a>
+
+      <div class="sidebar-status mt-8 px-4">
+        <div class="font-mono text-[9px] tracking-[0.25em] text-muted uppercase mb-3">Status</div>
+        <div class="space-y-2 font-mono text-[10.5px]">
+          <div class="flex justify-between"><span class="text-muted">SYS</span><span class="text-moss">OPERATIONAL</span></div>
+          <div class="flex justify-between"><span class="text-muted">CHANNELS</span><span class="text-moss">8 / 8</span></div>
+          <div class="flex justify-between"><span class="text-muted">PHASE</span><span class="text-gold">01 · FOUND</span></div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="px-4 sm:px-5 lg:px-8 xl:px-12 py-6 sm:py-8 lg:py-10 w-full min-w-0 max-w-none">
+
+    <!-- ============ [01] OVERVIEW ============ -->
+    <section id="sec-overview" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-5">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[01]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase cursor">Overview</h2>
+      </div>
+
+      <!-- Hero panel -->
+      <div class="panel scanlines grid-bg overflow-hidden relative">
+        <div class="p-6 sm:p-8 lg:p-14">
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 sm:gap-8">
+            <div class="w-full lg:max-w-3xl">
+              <div class="flex items-center gap-3 mb-6">
+                <svg width="44" height="44" viewBox="0 0 40 40" fill="none" class="logo-glow">
+                  <path d="M5 32 L5 8 L20 24 L35 8 L35 32" stroke="#7a9b5e" stroke-width="2.5" stroke-linejoin="miter" fill="none"/>
+                  <circle cx="20" cy="24" r="1.8" fill="#7a9b5e"/>
+                </svg>
+                <span class="font-mono text-[11px] tracking-[0.3em] text-muted uppercase">Mosskyn · Est. 2024</span>
+              </div>
+              <h1 class="font-display text-3xl sm:text-4xl lg:text-6xl text-bone tracking-tight leading-[1.05] font-light">
+                Resilience, written <br/> into skin<span class="text-moss">.</span>
+              </h1>
+              <p class="mt-6 text-bone/70 text-lg leading-relaxed max-w-2xl font-light">
+                Modern skincare for every shade, every season, every skin.
+              </p>
+              <p class="mt-5 text-muted text-sm font-mono tracking-wider">
+                D2C · WHOLESALE · AFFILIATE · FRANCHISE · IP LIBRARY
+              </p>
+            </div>
+            <div class="hero-meta font-mono text-xs text-muted lg:text-right space-y-1 shrink-0">
+              <div>HQ · MIAMI, FL</div>
+              <div>STATUS · <span class="text-moss">LIVE</span></div>
+              <div>v1.0 · 2024</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI strip -->
+        <div class="border-t border-border grid grid-cols-2 lg:grid-cols-4">
+          <div class="kpi-tile border-r border-border last:border-r-0 p-6 lg:p-8">
+            <div class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase mb-3">TAM · Global Skincare</div>
+            <div class="stat-num text-3xl lg:text-4xl text-bone" data-counter="200" data-suffix="B+" data-prefix="$">$200B+</div>
+            <div class="font-mono text-[10px] text-muted mt-2 tracking-wider">2024 · WORLDWIDE</div>
+          </div>
+          <div class="kpi-tile border-r border-border last:border-r-0 p-6 lg:p-8">
+            <div class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase mb-3">SAM · Clean / Clinical</div>
+            <div class="stat-num text-3xl lg:text-4xl text-bone" data-counter="45" data-suffix="B+" data-prefix="$">$45B+</div>
+            <div class="font-mono text-[10px] text-muted mt-2 tracking-wider">PREMIUM SEGMENT</div>
+          </div>
+          <div class="kpi-tile border-r border-border lg:border-r border-t lg:border-t-0 border-border p-6 lg:p-8">
+            <div class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase mb-3">SOM · 5YR Target</div>
+            <div class="stat-num text-3xl lg:text-4xl text-bone">$500M<span class="text-muted">–</span>$2B</div>
+            <div class="font-mono text-[10px] text-muted mt-2 tracking-wider">CAPTURABLE SHARE</div>
+          </div>
+          <div class="kpi-tile border-t lg:border-t-0 border-border p-6 lg:p-8">
+            <div class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase mb-3">Gross Margin</div>
+            <div class="stat-num text-3xl lg:text-4xl text-moss">68<span class="text-muted">–</span>78<span class="text-bone/60 text-2xl">%</span></div>
+            <div class="font-mono text-[10px] text-muted mt-2 tracking-wider">D2C BLENDED</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Philosophy + What We Are -->
+      <div class="grid lg:grid-cols-2 gap-5 mt-5">
+        <div class="panel p-8">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-4">// Philosophy</div>
+          <p class="text-bone/85 leading-relaxed mb-4 text-[15px] font-light">
+            The name <span class="font-mono text-moss">MOSSKYN</span> joins <em>moss</em> — a quiet symbol of resilience in Native American and Japanese wabi-sabi traditions — with <em>skin</em>. Where life persists through difficulty, beauty becomes inevitable.
+          </p>
+          <p class="text-bone/70 leading-relaxed text-[14px] font-light">
+            Our formulations are built on a <span class="text-bone">bio-identical lipid matrix</span> rich in Vitamins <span class="font-mono text-moss">A · D · E · K</span> — the same fat-soluble vitamins skin uses to regenerate. Ancestral wisdom, clinical precision.
+          </p>
+        </div>
+        <div class="panel p-8">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-4">// What We Are</div>
+          <ul class="space-y-3 font-mono text-[13px] text-bone/85">
+            <li class="flex gap-3"><span class="text-moss">›</span><span>A vertically-integrated skincare house — formula, brand, and channel under one roof.</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>A premium D2C engine designed for blended 68–78% gross margins.</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>An automated wholesale + affiliate operation already live.</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>A flagship-and-franchise growth model paired with a community-rooted CSR program.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [02] REVENUE STREAMS ============ -->
+    <section id="sec-revenue" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[02]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Revenue Streams</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Eight diversified channels. All built. All accounted for.</p>
+
+      <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <!-- R01 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R01</span>
+            <span class="badge badge-live">[ Live ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">D2C</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">mosskyn.com</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Direct product sales. Premium margins, owned customer relationship, no intermediary.</p>
+        </div>
+        <!-- R02 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R02</span>
+            <span class="badge badge-active">[ Active ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">B2B Wholesale</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Trade outreach · bulk</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Automated trade outreach engine driving spas, salons, boutiques and bulk accounts.</p>
+        </div>
+        <!-- R03 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R03</span>
+            <span class="badge badge-built">[ Built ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Affiliate Network</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">15% · 10% · 8%</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Commission resale — single sale, recurring, and bulk wholesale tiers.</p>
+        </div>
+        <!-- R04 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R04</span>
+            <span class="badge badge-active">[ Active ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Influencer / PR</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Brandntions network</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Curated campaigns through the Brandntions creator + press network.</p>
+        </div>
+        <!-- R05 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R05</span>
+            <span class="badge badge-ongoing">[ Ongoing ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Community / Events</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Brand equity · direct</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">In-person activations build brand equity and convert directly to consumer.</p>
+        </div>
+        <!-- R06 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R06</span>
+            <span class="badge badge-planned">[ Planned · NY/MIA ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Flagship Store</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Physical retail</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">A physical retail experience anchoring the brand in two flagship cities.</p>
+        </div>
+        <!-- R07 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R07</span>
+            <span class="badge badge-phase2">[ Phase 2 ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Franchise</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Licensed · territory</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Licensed local stores. Exclusive and non-exclusive territory options.</p>
+        </div>
+        <!-- R08 -->
+        <div class="channel-card panel p-6">
+          <div class="flex justify-between items-start mb-4">
+            <span class="font-mono text-[10px] text-muted tracking-[0.2em]">R08</span>
+            <span class="badge badge-asset">[ Asset ]</span>
+          </div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 tracking-wide">Formula IP Library</h3>
+          <div class="font-mono text-[11px] text-moss mb-3">Proprietary · lab-tested</div>
+          <p class="text-bone/65 text-[13px] leading-relaxed">Lab-tested proprietary formulas held as trade secrets — the durable moat.</p>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [03] FINANCIALS ============ -->
+    <section id="sec-financials" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[03]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Financials</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Five-year revenue projection. Three scenarios. Unit economics that compound.</p>
+
+      <!-- Projection chart -->
+      <div class="panel p-6 lg:p-8 mb-5">
+        <div class="panel-header flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-2">// Revenue Projection · Y1–Y5</div>
+            <div class="font-mono text-[11px] text-muted">SCENARIO MODELING · ANNUAL REVENUE (USD)</div>
+          </div>
+          <div class="tab-group" id="scenarioTabs">
+            <button data-scenario="conservative" class="scen-btn tab tab-active">CONSERVATIVE</button>
+            <button data-scenario="base" class="scen-btn tab">BASE</button>
+            <button data-scenario="aggressive" class="scen-btn tab">AGGRESSIVE</button>
+          </div>
+        </div>
+        <div class="chart-wrap chart-wrap--tall h-[240px] sm:h-[300px] lg:h-[340px]">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-5 mb-5">
+        <!-- Unit economics -->
+        <div class="panel">
+          <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Unit Economics</div>
+            <span class="font-mono text-[10px] text-muted">PER UNIT</span>
+          </div>
+          <div class="spec-row"><span class="k">Avg Retail Price</span><span class="v">$32.00</span></div>
+          <div class="spec-row"><span class="k">COGS</span><span class="v">$7.00 – $10.00</span></div>
+          <div class="spec-row"><span class="k">D2C Gross Margin</span><span class="v text-moss">68 – 78 %</span></div>
+          <div class="spec-row"><span class="k">Wholesale Gross Margin</span><span class="v">35 – 50 %</span></div>
+          <div class="spec-row"><span class="k">CAC Target</span><span class="v">&lt; $18.00</span></div>
+          <div class="spec-row"><span class="k">LTV Target</span><span class="v">$120 – $180</span></div>
+          <div class="spec-row"><span class="k">LTV : CAC</span><span class="v text-moss">7 : 1 +</span></div>
+          <div class="spec-row"><span class="k">Repeat Purchase Rate</span><span class="v">35 – 45 %</span></div>
+        </div>
+
+        <!-- Breakeven -->
+        <div class="panel p-6 lg:p-8 flex flex-col justify-between">
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-3">// Breakeven Indicator</div>
+            <div class="stat-num text-4xl lg:text-5xl text-bone mb-1">$600K<span class="text-muted text-2xl"> – </span>$800K</div>
+            <div class="font-mono text-[11px] text-muted tracking-wider">ARR · BREAKEVEN THRESHOLD</div>
+            <div class="mt-6 font-mono text-[12px] text-bone/80">Estimated <span class="text-moss">12 – 18 months</span> to operational breakeven on disciplined CAC + repeat purchase.</div>
+          </div>
+          <div class="breakeven-stats mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-[11px]">
+            <div class="border border-border p-3"><div class="text-muted text-[9px] tracking-wider mb-1">RUNWAY</div><div class="text-bone text-base">18 MO</div></div>
+            <div class="border border-border p-3"><div class="text-muted text-[9px] tracking-wider mb-1">BURN</div><div class="text-bone text-base">LEAN</div></div>
+            <div class="border border-border p-3"><div class="text-muted text-[9px] tracking-wider mb-1">EBITDA Y3</div><div class="text-moss text-base">+15%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Year-by-year table -->
+      <div class="panel">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Year-By-Year · Conservative Base</div>
+          <span class="font-mono text-[10px] text-muted">PRIMARY DRIVERS</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full font-mono text-[12.5px]">
+            <thead>
+              <tr class="text-muted text-[10px] tracking-[0.2em] uppercase">
+                <th class="text-left px-6 py-3 font-medium">Year</th>
+                <th class="text-right px-6 py-3 font-medium">Revenue</th>
+                <th class="text-right px-6 py-3 font-medium">YoY</th>
+                <th class="text-left px-6 py-3 font-medium">Primary Drivers</th>
+              </tr>
+            </thead>
+            <tbody class="text-bone/90">
+              <tr class="border-t border-border"><td class="px-6 py-3">Y1</td><td class="text-right px-6 py-3">$375,000</td><td class="text-right px-6 py-3 text-muted">—</td><td class="px-6 py-3 text-bone/70">D2C launch · early wholesale · affiliate seeds</td></tr>
+              <tr class="border-t border-border"><td class="px-6 py-3">Y2</td><td class="text-right px-6 py-3">$1,850,000</td><td class="text-right px-6 py-3 text-moss">+393%</td><td class="px-6 py-3 text-bone/70">Wholesale scale · PR + influencer engine</td></tr>
+              <tr class="border-t border-border"><td class="px-6 py-3">Y3</td><td class="text-right px-6 py-3">$7,500,000</td><td class="text-right px-6 py-3 text-moss">+305%</td><td class="px-6 py-3 text-bone/70">Flagship NY/MIA · franchise pilots</td></tr>
+              <tr class="border-t border-border"><td class="px-6 py-3">Y4</td><td class="text-right px-6 py-3">$17,000,000</td><td class="text-right px-6 py-3 text-moss">+127%</td><td class="px-6 py-3 text-bone/70">Franchise rollout · international wholesale</td></tr>
+              <tr class="border-t border-border"><td class="px-6 py-3">Y5</td><td class="text-right px-6 py-3">$37,500,000</td><td class="text-right px-6 py-3 text-moss">+121%</td><td class="px-6 py-3 text-bone/70">Multi-region franchise · licensing · category expansion</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [04] PRICING & WHOLESALE ============ -->
+    <section id="sec-pricing" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[04]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Pricing &amp; Wholesale</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Four retail SKUs. Volume MOQ tiers — 15% at 500 · 25% at 1,000 · up to 40% at 10,000+.</p>
+
+      <!-- SKU grid -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <div class="panel p-6">
+          <div class="font-mono text-[10px] text-muted tracking-[0.2em] mb-3">SKU · IR-001</div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 leading-snug">Intense Repair Face</h3>
+          <div class="font-mono text-[11px] text-moss mb-4">Tallow Balm · 5g jar</div>
+          <div class="stat-num text-3xl text-bone mb-3">$15<span class="text-muted text-lg">.00</span></div>
+          <div class="border-t border-border pt-3 font-mono text-[10.5px] text-muted space-y-1">
+            <div class="flex justify-between"><span>FORMAT</span><span class="text-bone/80">JAR</span></div>
+            <div class="flex justify-between"><span>SIZE</span><span class="text-bone/80">5G</span></div>
+          </div>
+        </div>
+        <div class="panel p-6">
+          <div class="font-mono text-[10px] text-muted tracking-[0.2em] mb-3">SKU · DC-002</div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 leading-snug">Deep Clean Face</h3>
+          <div class="font-mono text-[11px] text-moss mb-4">Cleanser · std</div>
+          <div class="stat-num text-3xl text-bone mb-3">$29<span class="text-muted text-lg">.00</span></div>
+          <div class="border-t border-border pt-3 font-mono text-[10.5px] text-muted space-y-1">
+            <div class="flex justify-between"><span>FORMAT</span><span class="text-bone/80">PUMP</span></div>
+            <div class="flex justify-between"><span>SIZE</span><span class="text-bone/80">STD</span></div>
+          </div>
+        </div>
+        <div class="panel p-6">
+          <div class="font-mono text-[10px] text-muted tracking-[0.2em] mb-3">SKU · DC-003</div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 leading-snug">Deep Clean Body</h3>
+          <div class="font-mono text-[11px] text-moss mb-4">Cleanser · std</div>
+          <div class="stat-num text-3xl text-bone mb-3">$37<span class="text-muted text-lg">.00</span></div>
+          <div class="border-t border-border pt-3 font-mono text-[10.5px] text-muted space-y-1">
+            <div class="flex justify-between"><span>FORMAT</span><span class="text-bone/80">PUMP</span></div>
+            <div class="flex justify-between"><span>SIZE</span><span class="text-bone/80">STD</span></div>
+          </div>
+        </div>
+        <div class="panel p-6">
+          <div class="font-mono text-[10px] text-muted tracking-[0.2em] mb-3">SKU · PG-004</div>
+          <h3 class="font-mono text-bone text-[14px] mb-1 leading-snug">The Purge</h3>
+          <div class="font-mono text-[11px] text-moss mb-4">BHA Penetration Oil</div>
+          <div class="stat-num text-3xl text-bone mb-3">$45<span class="text-muted text-lg">.00</span></div>
+          <div class="border-t border-border pt-3 font-mono text-[10.5px] text-muted space-y-1">
+            <div class="flex justify-between"><span>FORMAT</span><span class="text-bone/80">DROPPER</span></div>
+            <div class="flex justify-between"><span>SIZE</span><span class="text-bone/80">STD</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wholesale calculator -->
+      <div class="panel">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Wholesale Calculator · Live</div>
+          <span class="font-mono text-[10px] text-muted flex items-center gap-2"><span class="live-dot"></span>INTERACTIVE</span>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-0">
+          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border">
+            <div class="space-y-5">
+              <div>
+                <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Product SKU</label>
+                <select id="ws-sku">
+                  <option value="0" data-price="15">Intense Repair Face · 5g · $15</option>
+                  <option value="1" data-price="29">Deep Clean Face · $29</option>
+                  <option value="2" data-price="37">Deep Clean Body · $37</option>
+                  <option value="3" data-price="45">The Purge · BHA Oil · $45</option>
+                </select>
+              </div>
+              <div>
+                <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Order Quantity (units)</label>
+                <input type="number" id="ws-qty" min="1" step="1" value="500"/>
+                <div class="mt-3 grid gap-2 font-mono text-[10.5px]">
+                  <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">MOQ 500+</span><span class="text-moss">15% off</span></div>
+                  <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">MOQ 1,000+</span><span class="text-moss">25% off</span></div>
+                  <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">MOQ 10,000+</span><span class="text-moss">40% off · max</span></div>
+                </div>
+                <div class="mt-2 font-mono text-[10.5px] text-muted">Active tier: <span id="ws-tier-label" class="text-bone">500+ · 15% off</span></div>
+                <div class="font-mono text-[10.5px] text-muted">Min MOQ: <span id="ws-moq" class="text-bone">500</span> units</div>
+              </div>
+            </div>
+          </div>
+          <div class="p-6 lg:p-8 bg-bg/40">
+            <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-5">// Output</div>
+            <div class="space-y-3 font-mono">
+              <div class="flex justify-between items-baseline border-b border-border pb-2">
+                <span class="text-muted text-[11px] tracking-wider uppercase">Retail / Unit</span>
+                <span id="ws-retail" class="text-bone text-lg num">$15.00</span>
+              </div>
+              <div class="flex justify-between items-baseline border-b border-border pb-2">
+                <span class="text-muted text-[11px] tracking-wider uppercase">Discount</span>
+                <span id="ws-discount" class="text-moss text-lg num">15%</span>
+              </div>
+              <div class="flex justify-between items-baseline border-b border-border pb-2">
+                <span class="text-muted text-[11px] tracking-wider uppercase">Wholesale / Unit</span>
+                <span id="ws-wholesale" class="text-moss text-lg num">$12.75</span>
+              </div>
+              <div class="flex justify-between items-baseline border-b border-border pb-2">
+                <span class="text-muted text-[11px] tracking-wider uppercase">Discount Saved</span>
+                <span id="ws-saved" class="text-gold num">$45.00</span>
+              </div>
+              <div class="flex justify-between items-baseline pt-3">
+                <span class="text-bone text-[12px] tracking-wider uppercase">Total Order</span>
+                <span id="ws-total" class="text-bone text-3xl num">$105.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [05] AFFILIATE ============ -->
+    <section id="sec-affiliate" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[05]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Affiliate Calculator</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Three tiers. One commission engine. Real numbers for real partners.</p>
+
+      <div class="panel">
+        <div class="panel-header px-4 sm:px-6 py-4 border-b border-border flex justify-between items-center">
+          <div class="tab-group">
+            <button data-rate="0.15" data-tier="single" class="aff-tab tab tab-active">SINGLE · 15%</button>
+            <button data-rate="0.10" data-tier="recurring" class="aff-tab tab">RECURRING · 10%</button>
+            <button data-rate="0.08" data-tier="bulk" class="aff-tab tab">BULK · 8%</button>
+          </div>
+          <span class="font-mono text-[10px] text-muted hidden md:flex items-center gap-2"><span class="live-dot"></span>LIVE</span>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-0">
+          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border">
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Sales Volume (USD)</label>
+              <input type="number" id="aff-volume" min="0" step="100" value="10000"/>
+            </div>
+            <div class="mt-5">
+              <input type="range" id="aff-slider" min="0" max="500000" step="500" value="10000"/>
+              <div class="flex justify-between mt-2 font-mono text-[10px] text-muted tracking-wider">
+                <span>$0</span><span>$250K</span><span>$500K</span>
+              </div>
+            </div>
+            <div class="mt-6 grid grid-cols-3 gap-2 font-mono text-[10.5px]">
+              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="10000">$10K</button>
+              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="50000">$50K</button>
+              <button class="aff-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-val="100000">$100K</button>
+            </div>
+          </div>
+          <div class="p-6 lg:p-8 bg-bg/40">
+            <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-3">// Commission Earned</div>
+            <div class="flex items-baseline gap-2">
+              <span id="aff-result" class="stat-num text-5xl lg:text-6xl text-moss num">$1,500</span>
+            </div>
+            <div class="font-mono text-[11px] text-muted mt-3 tracking-wider" id="aff-detail">15% OF $10,000 SALES VOLUME</div>
+            <div class="mt-6 border-t border-border pt-5 space-y-2 font-mono text-[12px]">
+              <div class="flex justify-between"><span class="text-muted">Net to MOSSKYN</span><span id="aff-net" class="text-bone num">$8,500</span></div>
+              <div class="flex justify-between"><span class="text-muted">Tier</span><span id="aff-tier-label" class="text-bone">Single Sale</span></div>
+              <div class="flex justify-between"><span class="text-muted">Effective Rate</span><span id="aff-rate-label" class="text-moss">15.00 %</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stacked benchmarks -->
+        <div class="border-t border-border p-6 lg:p-8">
+          <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-5">// Benchmark · Commission Across Tiers</div>
+          <div class="chart-wrap chart-wrap--short h-[180px] sm:h-[220px]"><canvas id="affChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [06] FRANCHISE ============ -->
+    <section id="sec-franchise" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[06]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Franchise Model</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Territory-protected. Royalty-rich. Capital-light for MOSSKYN.</p>
+
+      <div class="grid lg:grid-cols-2 gap-5 mb-5">
+        <div class="panel p-7">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-mono text-bone text-[15px] tracking-wide">EXCLUSIVE TERRITORY</h3>
+            <span class="badge badge-active">[ Premium ]</span>
+          </div>
+          <div class="stat-num text-4xl text-bone mb-2">$35K<span class="text-muted text-2xl"> – </span>$75K</div>
+          <div class="font-mono text-[11px] text-muted tracking-wider mb-5">FRANCHISE FEE · ONE-TIME</div>
+          <ul class="space-y-2 font-mono text-[12.5px] text-bone/85">
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Exclusive zip-code protection</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Priority on regional expansion</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Co-branded Roots Program rights</span></li>
+          </ul>
+        </div>
+        <div class="panel p-7">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-mono text-bone text-[15px] tracking-wide">NON-EXCLUSIVE</h3>
+            <span class="badge badge-built">[ Standard ]</span>
+          </div>
+          <div class="stat-num text-4xl text-bone mb-2">$15K<span class="text-muted text-2xl"> – </span>$25K</div>
+          <div class="font-mono text-[11px] text-muted tracking-wider mb-5">FRANCHISE FEE · ONE-TIME</div>
+          <ul class="space-y-2 font-mono text-[12.5px] text-bone/85">
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Shared regional rights</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Lower entry barrier</span></li>
+            <li class="flex gap-3"><span class="text-moss">›</span><span>Full brand + formula license</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Spec sheet -->
+      <div class="grid lg:grid-cols-2 gap-5 mb-5">
+        <div class="panel">
+          <div class="px-6 py-4 border-b border-border">
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Operating Specs</div>
+          </div>
+          <div class="spec-row"><span class="k">Royalty</span><span class="v">6 %</span></div>
+          <div class="spec-row"><span class="k">Marketing Contribution</span><span class="v">2 %</span></div>
+          <div class="spec-row"><span class="k">Buildout</span><span class="v">$80K – $150K</span></div>
+          <div class="spec-row"><span class="k">Working Capital</span><span class="v">$30K – $50K</span></div>
+        </div>
+        <div class="panel">
+          <div class="px-6 py-4 border-b border-border">
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Franchisee Requirements</div>
+          </div>
+          <div class="spec-row"><span class="k">Net Worth Required</span><span class="v">$250,000</span></div>
+          <div class="spec-row"><span class="k">Liquid Capital</span><span class="v">$100,000</span></div>
+          <div class="spec-row"><span class="k">Estimated ROI</span><span class="v text-moss">18 – 30 mo</span></div>
+          <div class="spec-row"><span class="k">Territory Protection</span><span class="v">Zip-Code</span></div>
+        </div>
+      </div>
+
+      <!-- Franchise ROI -->
+      <div class="panel">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Franchise ROI Estimator</div>
+          <span class="font-mono text-[10px] text-muted flex items-center gap-2"><span class="live-dot"></span>INTERACTIVE</span>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-0">
+          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border space-y-5">
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Tier</label>
+              <select id="fr-tier">
+                <option value="exclusive">Exclusive Territory</option>
+                <option value="non">Non-Exclusive</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Market Size</label>
+              <select id="fr-market">
+                <option value="small">Small Market</option>
+                <option value="medium" selected>Medium Market</option>
+                <option value="large">Large Market</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Projected Monthly Revenue</label>
+              <input type="number" id="fr-revenue" value="60000" step="1000"/>
+            </div>
+          </div>
+          <div class="p-6 lg:p-8 bg-bg/40">
+            <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-4">// Estimate</div>
+            <div class="space-y-3 font-mono text-[12.5px]">
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Franchise Fee</span><span id="fr-fee" class="text-bone num">$55,000</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Buildout</span><span id="fr-build" class="text-bone num">$115,000</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Working Capital</span><span id="fr-wc" class="text-bone num">$40,000</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Total Upfront</span><span id="fr-upfront" class="text-bone text-lg num">$210,000</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Monthly Royalty (6%)</span><span id="fr-royalty" class="text-bone num">$3,600</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Marketing (2%)</span><span id="fr-marketing" class="text-bone num">$1,200</span></div>
+              <div class="flex justify-between border-b border-border pb-2"><span class="text-muted tracking-wider uppercase text-[11px]">Est. Monthly Profit</span><span id="fr-profit" class="text-moss num">$13,200</span></div>
+              <div class="flex justify-between pt-2"><span class="text-bone tracking-wider uppercase text-[12px]">Payback Period</span><span id="fr-payback" class="text-bone text-2xl num">16 mo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [07] MARKET ============ -->
+    <section id="sec-market" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[07]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Market Size</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">TAM, SAM, SOM — and the cultural inflection making now the moment.</p>
+
+      <div class="grid lg:grid-cols-5 gap-5 mb-5">
+        <!-- Funnel -->
+        <div class="panel p-6 lg:p-8 lg:col-span-3">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-6">// Addressable Market · Nested</div>
+          <div class="space-y-3">
+            <div class="funnel-row" style="border-color:#2d3424; background:rgba(122,155,94,0.02);">
+              <div class="text-[10px] tracking-[0.25em] text-muted uppercase mb-2">TAM · Total Addressable</div>
+              <div class="stat-num text-4xl text-bone">$200B<span class="text-muted">+</span></div>
+              <div class="font-mono text-[11px] text-muted mt-2">GLOBAL SKINCARE · 2024</div>
+            </div>
+            <div class="funnel-row funnel-nested mx-auto" style="border-color:#3a4530; background:rgba(122,155,94,0.04); width:80%;">
+              <div class="text-[10px] tracking-[0.25em] text-muted uppercase mb-2">SAM · Serviceable Addressable</div>
+              <div class="stat-num text-4xl text-bone">$45B<span class="text-muted">+</span></div>
+              <div class="font-mono text-[11px] text-muted mt-2">CLEAN / CLINICAL SEGMENT</div>
+            </div>
+            <div class="funnel-row funnel-nested mx-auto" style="border-color:#7a9b5e; background:rgba(122,155,94,0.08); width:60%;">
+              <div class="text-[10px] tracking-[0.25em] text-moss uppercase mb-2">SOM · Serviceable Obtainable</div>
+              <div class="stat-num text-3xl text-moss">$500M<span class="text-muted">–</span>$2B</div>
+              <div class="font-mono text-[11px] text-muted mt-2">5YR CAPTURABLE TARGET</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Why now -->
+        <div class="panel p-6 lg:p-8 lg:col-span-2">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-4">// Why Now</div>
+          <div class="space-y-4 text-bone/85 text-[14px] leading-relaxed font-light">
+            <p><span class="font-mono text-moss">01 · </span>Post-pandemic ingredient literacy has reset the consumer. Buyers read labels the way they read nutrition facts.</p>
+            <p><span class="font-mono text-moss">02 · </span>The tallow and ancestral skincare movement has crossed from fringe to mainstream — but lacks a premium answer.</p>
+            <p><span class="font-mono text-moss">03 · </span>MOSSKYN is that answer: bio-identical lipid science, modern brand, every shade in mind.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Growth chart -->
+      <div class="panel p-6 lg:p-8">
+        <div class="flex justify-between items-center mb-4">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Skincare Market Growth · 2024 – 2029</div>
+          <span class="font-mono text-[10px] text-muted">USD · BILLIONS</span>
+        </div>
+        <div class="chart-wrap chart-wrap--medium h-[200px] sm:h-[260px]"><canvas id="marketChart"></canvas></div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [08] ROADMAP ============ -->
+    <section id="sec-roadmap" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[08]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Roadmap</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Four phases. The foundation is complete.</p>
+
+      <div class="space-y-4">
+        <!-- Phase 1 -->
+        <div class="panel p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+            <div>
+              <div class="flex items-center gap-3 mb-1">
+                <span class="phase-pill" style="background:rgba(122,155,94,0.1); color:#7a9b5e; border:1px solid rgba(122,155,94,0.3);"><span class="live-dot"></span>PHASE 01 · FOUNDATION</span>
+              </div>
+              <h3 class="font-mono text-bone text-[16px] tracking-wide mt-2">Foundation · Current</h3>
+            </div>
+            <span class="font-mono text-[11px] text-muted tracking-wider">STATUS · COMPLETE</span>
+          </div>
+          <ul class="grid sm:grid-cols-2 gap-y-2 gap-x-6 font-mono text-[12.5px] text-bone/90">
+            <li class="flex gap-3"><span class="text-moss">✓</span>Brand identity finalized</li>
+            <li class="flex gap-3"><span class="text-moss">✓</span>Core SKU catalog launched</li>
+            <li class="flex gap-3"><span class="text-moss">✓</span>D2C site (mosskyn.com) live</li>
+            <li class="flex gap-3"><span class="text-moss">✓</span>Wholesale outreach engine built</li>
+            <li class="flex gap-3"><span class="text-moss">✓</span>Affiliate network structured</li>
+            <li class="flex gap-3"><span class="text-moss">✓</span>Brandntions ecosystem integration</li>
+          </ul>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="panel p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+            <div>
+              <span class="phase-pill" style="background:rgba(201,169,110,0.1); color:#c9a96e; border:1px solid rgba(201,169,110,0.3);">PHASE 02 · SCALE</span>
+              <h3 class="font-mono text-bone text-[16px] tracking-wide mt-2">Scale · Months 3 – 12</h3>
+            </div>
+            <span class="font-mono text-[11px] text-muted tracking-wider">STATUS · IN MOTION</span>
+          </div>
+          <ul class="grid sm:grid-cols-2 gap-y-2 gap-x-6 font-mono text-[12.5px] text-bone/90">
+            <li class="flex gap-3"><span class="text-gold">○</span>Aggressive wholesale account acquisition</li>
+            <li class="flex gap-3"><span class="text-gold">○</span>Influencer + PR campaign cycles</li>
+            <li class="flex gap-3"><span class="text-gold">○</span>SKU expansion · 8 → 14 products</li>
+            <li class="flex gap-3"><span class="text-gold">○</span>Roots Program pilot events (MIA · NY)</li>
+            <li class="flex gap-3"><span class="text-gold">○</span>Subscription / replenishment launch</li>
+            <li class="flex gap-3"><span class="text-gold">○</span>First $1M revenue milestone</li>
+          </ul>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="panel p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+            <div>
+              <span class="phase-pill" style="background:rgba(107,130,148,0.1); color:#6b8294; border:1px solid rgba(107,130,148,0.3);">PHASE 03 · FLAGSHIP</span>
+              <h3 class="font-mono text-bone text-[16px] tracking-wide mt-2">Flagship · Months 12 – 24</h3>
+            </div>
+            <span class="font-mono text-[11px] text-muted tracking-wider">STATUS · PLANNED</span>
+          </div>
+          <ul class="grid sm:grid-cols-2 gap-y-2 gap-x-6 font-mono text-[12.5px] text-bone/90">
+            <li class="flex gap-3"><span class="text-slate">◇</span>Flagship retail — NYC</li>
+            <li class="flex gap-3"><span class="text-slate">◇</span>Flagship retail — Miami</li>
+            <li class="flex gap-3"><span class="text-slate">◇</span>Franchise FDD finalized</li>
+            <li class="flex gap-3"><span class="text-slate">◇</span>First 2–3 franchise pilots</li>
+            <li class="flex gap-3"><span class="text-slate">◇</span>International wholesale rollout</li>
+            <li class="flex gap-3"><span class="text-slate">◇</span>Roots 501(c)(3) pathway</li>
+          </ul>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="panel p-7">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+            <div>
+              <span class="phase-pill" style="background:rgba(138,141,131,0.08); color:#8a8d83; border:1px solid rgba(138,141,131,0.3);">PHASE 04 · EXPANSION</span>
+              <h3 class="font-mono text-bone text-[16px] tracking-wide mt-2">Expansion · Year 3 – 5</h3>
+            </div>
+            <span class="font-mono text-[11px] text-muted tracking-wider">STATUS · HORIZON</span>
+          </div>
+          <ul class="grid sm:grid-cols-2 gap-y-2 gap-x-6 font-mono text-[12.5px] text-bone/90">
+            <li class="flex gap-3"><span class="text-muted">◇</span>Franchise scale · 25+ locations</li>
+            <li class="flex gap-3"><span class="text-muted">◇</span>Category expansion · body + haircare</li>
+            <li class="flex gap-3"><span class="text-muted">◇</span>International licensing deals</li>
+            <li class="flex gap-3"><span class="text-muted">◇</span>Strategic exit conversations</li>
+            <li class="flex gap-3"><span class="text-muted">◇</span>Brandntions portfolio anchor</li>
+            <li class="flex gap-3"><span class="text-muted">◇</span>$50M+ ARR milestone</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [09] ROOTS ============ -->
+    <section id="sec-roots" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[09]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Roots Program</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Philanthropy that compounds — for skin, for community, for brand.</p>
+
+      <!-- Hero -->
+      <div class="panel scanlines grid-bg p-10 lg:p-14 mb-5 relative overflow-hidden">
+        <div class="max-w-3xl">
+          <div class="font-mono text-[10px] tracking-[0.3em] text-moss uppercase mb-4">// The Roots Program</div>
+          <h3 class="font-display text-3xl lg:text-5xl text-bone tracking-tight leading-tight font-light">
+            Community sourcing,<br/>community making.
+          </h3>
+          <p class="mt-5 text-bone/70 text-lg max-w-2xl font-light">
+            Where MOSSKYN goes, the soil it grew in goes with it.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-5 mb-5">
+        <div class="panel p-7">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-3">// What It Is</div>
+          <p class="text-bone/85 text-[14px] leading-relaxed font-light">A workshop series — free, public, hands-on — where local communities help make small batches of MOSSKYN product alongside the brand team. Half craft fair, half ingredient school.</p>
+        </div>
+        <div class="panel p-7">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-3">// How It Works</div>
+          <p class="text-bone/85 text-[14px] leading-relaxed font-light">Each event sources a portion of its ingredients locally. Attendees learn formulation basics, take home product, and leave inscribed on the batch label. The community literally goes into the bottle.</p>
+        </div>
+        <div class="panel p-7">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase mb-3">// Why It Matters</div>
+          <p class="text-bone/85 text-[14px] leading-relaxed font-light">Brand equity that no ad spend can buy. Customers become collaborators. Communities become brand. And every franchise opens already loved.</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-5">
+        <div class="panel">
+          <div class="px-6 py-4 border-b border-border">
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Program Structure</div>
+          </div>
+          <div class="spec-row"><span class="k">Pilot Cadence</span><span class="v">2 – 4 / qtr · MIA + NY</span></div>
+          <div class="spec-row"><span class="k">Scale Trigger</span><span class="v">Tied to franchise opening</span></div>
+          <div class="spec-row"><span class="k">New-Market Event</span><span class="v">Within first 90 days</span></div>
+          <div class="spec-row"><span class="k">501(c)(3) Pathway</span><span class="v text-moss">Planned</span></div>
+          <div class="spec-row"><span class="k">CSR Budget</span><span class="v">2 % of net revenue</span></div>
+        </div>
+
+        <!-- CSR calculator -->
+        <div class="panel">
+          <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+            <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// CSR Budget Calculator</div>
+            <span class="font-mono text-[10px] text-muted flex items-center gap-2"><span class="live-dot"></span>LIVE</span>
+          </div>
+          <div class="p-6">
+            <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Projected Annual Revenue</label>
+            <input type="number" id="csr-revenue" value="1850000" step="10000"/>
+            <div class="mt-6 border-t border-border pt-5">
+              <div class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase mb-2">Roots Allocation · 2%</div>
+              <div id="csr-output" class="stat-num text-4xl text-moss num">$37,000</div>
+              <div class="font-mono text-[11px] text-muted mt-3">EVENTS POSSIBLE · <span id="csr-events" class="text-bone">~7 – 12</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ [10] EXIT ============ -->
+    <section id="sec-exit" class="fade-up">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="font-mono text-[11px] text-muted tracking-[0.2em]">[10]</span>
+        <h2 class="font-mono text-[13px] tracking-[0.25em] text-bone uppercase">Exit Strategy</h2>
+      </div>
+      <p class="text-muted text-sm mb-7 font-light">Three horizons. Liquidity at every stage.</p>
+
+      <div class="grid lg:grid-cols-3 gap-5 mb-5">
+        <div class="panel p-7">
+          <div class="phase-pill" style="background:rgba(122,155,94,0.1); color:#7a9b5e; border:1px solid rgba(122,155,94,0.3);">NEAR-TERM · Y1 – Y3</div>
+          <h3 class="font-mono text-bone text-[15px] tracking-wide mt-4 mb-4">Revenue Distribution</h3>
+          <ul class="space-y-2 font-mono text-[12.5px] text-bone/85">
+            <li class="flex gap-3"><span class="text-moss">›</span>Revenue share for early investors</li>
+            <li class="flex gap-3"><span class="text-moss">›</span>Franchise fee distribution</li>
+            <li class="flex gap-3"><span class="text-moss">›</span>Brand licensing royalties</li>
+            <li class="flex gap-3"><span class="text-moss">›</span>Quarterly distributions</li>
+          </ul>
+        </div>
+        <div class="panel p-7">
+          <div class="phase-pill" style="background:rgba(201,169,110,0.1); color:#c9a96e; border:1px solid rgba(201,169,110,0.3);">MID-TERM · Y3 – Y5</div>
+          <h3 class="font-mono text-bone text-[15px] tracking-wide mt-4 mb-4">Strategic Acquisition</h3>
+          <ul class="space-y-2 font-mono text-[12.5px] text-bone/85">
+            <li class="flex gap-3"><span class="text-gold">›</span>PE acquisition (rollup play)</li>
+            <li class="flex gap-3"><span class="text-gold">›</span>Strategic — Unilever · L'Oréal · Estée Lauder</li>
+            <li class="flex gap-3"><span class="text-gold">›</span>3 – 6× revenue multiples</li>
+            <li class="flex gap-3"><span class="text-gold">›</span>Management buyout option</li>
+          </ul>
+        </div>
+        <div class="panel p-7">
+          <div class="phase-pill" style="background:rgba(107,130,148,0.1); color:#6b8294; border:1px solid rgba(107,130,148,0.3);">LONG-TERM · Y5 +</div>
+          <h3 class="font-mono text-bone text-[15px] tracking-wide mt-4 mb-4">Platform &amp; IPO</h3>
+          <ul class="space-y-2 font-mono text-[12.5px] text-bone/85">
+            <li class="flex gap-3"><span class="text-slate">›</span>IPO at $50M+ ARR</li>
+            <li class="flex gap-3"><span class="text-slate">›</span>International licensing scale</li>
+            <li class="flex gap-3"><span class="text-slate">›</span>Brandntions portfolio anchor</li>
+            <li class="flex gap-3"><span class="text-slate">›</span>Adjacent category platforms</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Exit value estimator -->
+      <div class="panel">
+        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+          <div class="font-mono text-[10px] tracking-[0.25em] text-moss uppercase">// Exit Value Estimator</div>
+          <span class="font-mono text-[10px] text-muted flex items-center gap-2"><span class="live-dot"></span>INTERACTIVE</span>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-0">
+          <div class="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-border space-y-6">
+            <div>
+              <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase block mb-2">Projected ARR</label>
+              <input type="number" id="ex-arr" value="17000000" step="100000"/>
+            </div>
+            <div>
+              <div class="flex justify-between mb-2">
+                <label class="font-mono text-[10px] text-muted tracking-[0.2em] uppercase">Revenue Multiple</label>
+                <span id="ex-mult-label" class="font-mono text-[12px] text-moss">4.5×</span>
+              </div>
+              <input type="range" id="ex-mult" min="3" max="6" step="0.1" value="4.5"/>
+              <div class="flex justify-between mt-2 font-mono text-[10px] text-muted">
+                <span>3×</span><span>4.5×</span><span>6×</span>
+              </div>
+            </div>
+            <div class="preset-grid grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[10.5px]">
+              <button class="ex-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-arr="7500000">Y3 · $7.5M</button>
+              <button class="ex-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-arr="17000000">Y4 · $17M</button>
+              <button class="ex-preset border border-border py-2 text-bone/70 hover:text-bone hover:border-border2" data-arr="37500000">Y5 · $37.5M</button>
+            </div>
+          </div>
+          <div class="p-6 lg:p-8 bg-bg/40">
+            <div class="font-mono text-[10px] text-muted tracking-[0.25em] uppercase mb-3">// Estimated Acquisition Value</div>
+            <div id="ex-output" class="stat-num text-5xl lg:text-6xl text-moss num">$76.5M</div>
+            <div class="font-mono text-[11px] text-muted mt-3 tracking-wider" id="ex-detail">$17.0M ARR × 4.5× MULTIPLE</div>
+            <div class="mt-6 border-t border-border pt-5 space-y-2 font-mono text-[12px]">
+              <div class="flex justify-between"><span class="text-muted">Low (3×)</span><span id="ex-low" class="text-bone/80 num">$51.0M</span></div>
+              <div class="flex justify-between"><span class="text-muted">High (6×)</span><span id="ex-high" class="text-bone/80 num">$102.0M</span></div>
+            </div>
+            <p class="mt-6 font-mono text-[11px] text-moss leading-relaxed tracking-wide">// Current investors enjoy maximum upside.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-line my-12">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="fade-up mb-20">
+      <div class="panel scanlines grid-bg p-10 lg:p-14 relative overflow-hidden">
+        <div class="max-w-3xl">
+          <div class="font-mono text-[10px] tracking-[0.3em] text-moss uppercase mb-5">// Closing Statement</div>
+          <h3 class="font-display text-2xl lg:text-4xl text-bone tracking-tight leading-snug font-light">
+            MOSSKYN is not entering the skincare market<span class="text-moss">.</span><br/>
+            It is defining a new standard within it<span class="text-moss">.</span>
+          </h3>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8 mt-12 pt-8 border-t border-border">
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.25em] text-muted uppercase mb-3">// Contact</div>
+            <div class="font-mono text-[13px] text-bone/90 space-y-1.5">
+              <div>mosskyn.com</div>
+              <div>@mosskyn  ·  @mosskyn_</div>
+              <div class="text-muted">contact via mosskyn.com</div>
+            </div>
+          </div>
+          <div>
+            <div class="font-mono text-[10px] tracking-[0.25em] text-muted uppercase mb-3">// Status</div>
+            <div class="font-mono text-[13px] text-bone/90 space-y-1.5">
+              <div>POWERED BY BRANDNTIONS · MIAMI FL</div>
+              <div class="text-moss">ALL CHANNELS LIVE  ·  ALL ASSETS IN PLACE</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 pt-5 border-t border-border font-mono text-[10.5px] text-muted/70 leading-relaxed">
+          Legal · Trademark registration in progress · Formulations held as trade secrets, lab-tested and proprietary · FDD pending for franchise program · All projections are illustrative and not guarantees of performance.
+        </div>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- ============ BOTTOM TICKER ============ -->
+<div class="sticky bottom-0 z-40 bg-bg/95 backdrop-blur border-t border-border overflow-hidden w-full">
+  <div class="flex items-center h-9">
+    <div class="px-4 border-r border-border h-full flex items-center gap-2 shrink-0">
+      <span class="live-dot"></span>
+      <span class="font-mono text-[10px] tracking-[0.2em] text-moss uppercase">LIVE</span>
+    </div>
+    <div class="overflow-hidden flex-1">
+      <div class="ticker-track font-mono text-[11px] tracking-[0.15em] text-bone/80">
+        <!-- duplicated for seamless loop -->
+        <span class="px-6">TAM <span class="text-moss">$200B+</span></span><span class="text-border2">▪</span>
+        <span class="px-6">SAM <span class="text-moss">$45B+</span></span><span class="text-border2">▪</span>
+        <span class="px-6">SOM <span class="text-moss">$500M–$2B</span></span><span class="text-border2">▪</span>
+        <span class="px-6">GROSS MARGIN <span class="text-moss">68–78%</span></span><span class="text-border2">▪</span>
+        <span class="px-6">LTV:CAC <span class="text-moss">7:1</span></span><span class="text-border2">▪</span>
+        <span class="px-6">BREAKEVEN <span class="text-moss">$600K–$800K ARR</span></span><span class="text-border2">▪</span>
+        <span class="px-6">Y5 REVENUE <span class="text-moss">$37.5M</span></span><span class="text-border2">▪</span>
+        <span class="px-6">EXIT MULT <span class="text-moss">3×–6×</span></span><span class="text-border2">▪</span>
+        <span class="px-6">CHANNELS <span class="text-moss">8/8 LIVE</span></span><span class="text-border2">▪</span>
+        <!-- repeat -->
+        <span class="px-6">TAM <span class="text-moss">$200B+</span></span><span class="text-border2">▪</span>
+        <span class="px-6">SAM <span class="text-moss">$45B+</span></span><span class="text-border2">▪</span>
+        <span class="px-6">SOM <span class="text-moss">$500M–$2B</span></span><span class="text-border2">▪</span>
+        <span class="px-6">GROSS MARGIN <span class="text-moss">68–78%</span></span><span class="text-border2">▪</span>
+        <span class="px-6">LTV:CAC <span class="text-moss">7:1</span></span><span class="text-border2">▪</span>
+        <span class="px-6">BREAKEVEN <span class="text-moss">$600K–$800K ARR</span></span><span class="text-border2">▪</span>
+        <span class="px-6">Y5 REVENUE <span class="text-moss">$37.5M</span></span><span class="text-border2">▪</span>
+        <span class="px-6">EXIT MULT <span class="text-moss">3×–6×</span></span><span class="text-border2">▪</span>
+        <span class="px-6">CHANNELS <span class="text-moss">8/8 LIVE</span></span><span class="text-border2">▪</span>
+      </div>
+    </div>
+    <div class="px-4 border-l border-border h-full hidden md:flex items-center shrink-0">
+      <span class="font-mono text-[10px] tracking-[0.2em] text-muted uppercase">MSKYN · v1.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCRIPTS ============ -->
+<script>
+  /* ---------- Live clock ---------- */
+  function updateClock() {
+    const d = new Date();
+    const hh = String(d.getUTCHours()).padStart(2,'0');
+    const mm = String(d.getUTCMinutes()).padStart(2,'0');
+    const ss = String(d.getUTCSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${hh}:${mm}:${ss} UTC`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  /* ---------- Theme toggle ---------- */
+  const themeToggle = document.getElementById('theme-toggle');
+  function getTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mosskyn-theme', theme);
+    themeToggle?.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggle?.setAttribute('title', theme === 'dark' ? 'Light mode' : 'Dark mode');
+    if (typeof applyChartTheme === 'function') applyChartTheme();
+  }
+  themeToggle?.addEventListener('click', () => {
+    setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  });
+  themeToggle?.setAttribute('aria-label', getTheme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+
+  /* ---------- Mobile nav drawer ---------- */
+  const navToggle = document.getElementById('nav-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarNav = document.getElementById('sidebar-nav');
+  const navBackdrop = document.getElementById('nav-backdrop');
+  const navLinks = document.querySelectorAll('.nav-item');
+
+  function closeMobileNav() {
+    sidebar?.classList.remove('open');
+    navBackdrop?.classList.remove('open');
+    navBackdrop?.setAttribute('aria-hidden', 'true');
+    navToggle?.setAttribute('aria-expanded', 'false');
+    navToggle?.setAttribute('aria-label', 'Open navigation menu');
+    document.body.classList.remove('nav-open');
+  }
+
+  function openMobileNav() {
+    sidebar?.classList.add('open');
+    navBackdrop?.classList.add('open');
+    navBackdrop?.setAttribute('aria-hidden', 'false');
+    navToggle?.setAttribute('aria-expanded', 'true');
+    navToggle?.setAttribute('aria-label', 'Close navigation menu');
+    document.body.classList.add('nav-open');
+    setTimeout(resizeCharts, 400);
+  }
+
+  if (navToggle && sidebar) {
+    navToggle.addEventListener('click', () => {
+      if (sidebar.classList.contains('open')) closeMobileNav();
+      else openMobileNav();
+    });
+    navBackdrop?.addEventListener('click', closeMobileNav);
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) closeMobileNav();
+      });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) closeMobileNav();
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) closeMobileNav();
+    });
+  }
+
+  /* ---------- Fade-up on scroll ---------- */
+  const fadeObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        fadeObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-up').forEach(el => fadeObs.observe(el));
+
+  /* ---------- Active sidebar on scroll ---------- */
+  const sections = document.querySelectorAll('section[id^="sec-"]');
+  const navObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navLinks.forEach(l => {
+          l.classList.toggle('nav-active', l.dataset.target === id);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+  sections.forEach(s => navObs.observe(s));
+
+  /* ---------- Number formatting ---------- */
+  const fmt = (n, decimals = 0) => {
+    if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return '$' + (n/1e6).toFixed(decimals > 0 ? decimals : 1) + 'M';
+    if (n >= 1e3) return '$' + (n/1e3).toFixed(decimals > 0 ? decimals : 0) + 'K';
+    return '$' + n.toLocaleString('en-US', { maximumFractionDigits: decimals });
+  };
+  const fmtFull = (n) => '$' + Math.round(n).toLocaleString('en-US');
+
+  function getChartThemeColors() {
+    const s = getComputedStyle(document.documentElement);
+    return {
+      moss: s.getPropertyValue('--color-moss').trim(),
+      bg: s.getPropertyValue('--color-bg').trim(),
+      bone: s.getPropertyValue('--color-bone').trim(),
+      muted: s.getPropertyValue('--color-muted').trim(),
+      border: s.getPropertyValue('--color-border').trim(),
+      gold: s.getPropertyValue('--color-gold').trim(),
+      slate: s.getPropertyValue('--color-slate').trim(),
+    };
+  }
+
+  function makeRevenueGradient(ctx, height) {
+    const c = getChartThemeColors();
+    const grad = ctx.createLinearGradient(0, 0, 0, height || 340);
+    grad.addColorStop(0, c.moss + '59');
+    grad.addColorStop(1, c.moss + '00');
+    return grad;
+  }
+
+  function makeMarketGradient(ctx, height) {
+    const c = getChartThemeColors();
+    const grad = ctx.createLinearGradient(0, 0, 0, height || 260);
+    grad.addColorStop(0, c.moss + '73');
+    grad.addColorStop(1, c.moss + '05');
+    return grad;
+  }
+
+  function chartTooltipOptions() {
+    const c = getChartThemeColors();
+    return {
+      backgroundColor: c.bg,
+      titleColor: c.bone,
+      bodyColor: c.moss,
+      borderColor: c.border,
+      borderWidth: 1,
+      titleFont: { family: 'JetBrains Mono', size: 11 },
+      bodyFont: { family: 'JetBrains Mono', size: 12 },
+    };
+  }
+
+  function chartScaleColors() {
+    const c = getChartThemeColors();
+    return {
+      tick: { color: c.muted, font: { family: 'JetBrains Mono', size: 11 } },
+      grid: { color: c.border },
+    };
+  }
+
+  /* ============================================================
+     [03] REVENUE CHART
+     ============================================================ */
+  const yearLabels = ['Y1', 'Y2', 'Y3', 'Y4', 'Y5'];
+  const conservativeData = [375000, 1850000, 7500000, 17000000, 37500000];
+  const baseData = conservativeData.map(v => v * 1.5);
+  const aggressiveData = conservativeData.map(v => v * 2.2);
+
+  const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+  let chartTheme = getChartThemeColors();
+
+  const revenueChart = new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+      labels: yearLabels,
+      datasets: [{
+        label: 'Revenue',
+        data: conservativeData,
+        borderColor: chartTheme.moss,
+        backgroundColor: makeRevenueGradient(revenueCtx, 340),
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: chartTheme.bg,
+        pointBorderColor: chartTheme.moss,
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...chartTooltipOptions(),
+          titleFont: { family: 'JetBrains Mono', size: 11, weight: '500' },
+          bodyFont: { family: 'JetBrains Mono', size: 13, weight: '500' },
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            label: (c) => '  ' + fmt(c.parsed.y, 1)
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: chartScaleColors().tick,
+          grid: { color: chartTheme.border, drawTicks: false }
+        },
+        y: {
+          ticks: {
+            ...chartScaleColors().tick,
+            callback: (v) => fmt(v)
+          },
+          grid: { color: chartTheme.border, drawTicks: false }
+        }
+      }
+    }
+  });
+
+  document.querySelectorAll('.scen-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.scen-btn').forEach(b => b.classList.remove('tab-active'));
+      btn.classList.add('tab-active');
+      const s = btn.dataset.scenario;
+      const data = s === 'conservative' ? conservativeData : s === 'base' ? baseData : aggressiveData;
+      revenueChart.data.datasets[0].data = data;
+      revenueChart.update();
+    });
+  });
+
+  /* ============================================================
+     [04] WHOLESALE CALCULATOR
+     ============================================================ */
+  const wsSku = document.getElementById('ws-sku');
+  const wsQty = document.getElementById('ws-qty');
+  const wsMoq = document.getElementById('ws-moq');
+  const wsTierLabel = document.getElementById('ws-tier-label');
+  const wsDiscount = document.getElementById('ws-discount');
+  const wsRetail = document.getElementById('ws-retail');
+  const wsWholesale = document.getElementById('ws-wholesale');
+  const wsSaved = document.getElementById('ws-saved');
+  const wsTotal = document.getElementById('ws-total');
+
+  const WS_VOLUME_TIERS = [
+    { moq: 10000, discount: 0.40, label: '10,000+ · 40% off · max' },
+    { moq: 1000,  discount: 0.25, label: '1,000+ · 25% off' },
+    { moq: 500,   discount: 0.15, label: '500+ · 15% off' },
+  ];
+  const WS_MIN_MOQ = 500;
+
+  function getWholesaleTier(qty) {
+    if (qty >= 10000) return WS_VOLUME_TIERS[0];
+    if (qty >= 1000) return WS_VOLUME_TIERS[1];
+    if (qty >= 500) return WS_VOLUME_TIERS[2];
+    return { moq: WS_MIN_MOQ, discount: 0, label: 'Below MOQ · min 500 units' };
+  }
+
+  function updateWholesale() {
+    const price = parseFloat(wsSku.selectedOptions[0].dataset.price);
+    const qty = parseInt(wsQty.value, 10) || 0;
+    const tier = getWholesaleTier(qty);
+    const disc = tier.discount;
+    wsMoq.textContent = tier.moq >= WS_MIN_MOQ ? tier.moq.toLocaleString('en-US') : WS_MIN_MOQ;
+    wsTierLabel.textContent = tier.label;
+    wsDiscount.textContent = (disc * 100).toFixed(0) + '%';
+    wsDiscount.classList.toggle('text-muted', disc === 0);
+    wsDiscount.classList.toggle('text-moss', disc > 0);
+    const wholesale = price * (1 - disc);
+    const total = wholesale * qty;
+    const saved = (price - wholesale) * qty;
+    wsRetail.textContent = '$' + price.toFixed(2);
+    wsWholesale.textContent = '$' + wholesale.toFixed(2);
+    wsSaved.textContent = '$' + saved.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    wsTotal.textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  wsSku.addEventListener('change', updateWholesale);
+  wsQty.addEventListener('input', updateWholesale);
+  updateWholesale();
+
+  /* ============================================================
+     [05] AFFILIATE CALCULATOR
+     ============================================================ */
+  const affVolume = document.getElementById('aff-volume');
+  const affSlider = document.getElementById('aff-slider');
+  const affResult = document.getElementById('aff-result');
+  const affNet = document.getElementById('aff-net');
+  const affDetail = document.getElementById('aff-detail');
+  const affTierLabel = document.getElementById('aff-tier-label');
+  const affRateLabel = document.getElementById('aff-rate-label');
+  let affRate = 0.15;
+  let affTier = 'Single Sale';
+
+  function updateAffiliate() {
+    const v = parseFloat(affVolume.value) || 0;
+    const commission = v * affRate;
+    affResult.textContent = '$' + Math.round(commission).toLocaleString('en-US');
+    affNet.textContent = '$' + Math.round(v - commission).toLocaleString('en-US');
+    affDetail.textContent = `${(affRate*100).toFixed(0)}% OF $${v.toLocaleString('en-US')} SALES VOLUME`;
+    affTierLabel.textContent = affTier;
+    affRateLabel.textContent = (affRate*100).toFixed(2) + ' %';
+  }
+
+  document.querySelectorAll('.aff-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.aff-tab').forEach(b => b.classList.remove('tab-active'));
+      btn.classList.add('tab-active');
+      affRate = parseFloat(btn.dataset.rate);
+      affTier = btn.dataset.tier === 'single' ? 'Single Sale' : btn.dataset.tier === 'recurring' ? 'Recurring' : 'Bulk Wholesale';
+      updateAffiliate();
+    });
+  });
+
+  affVolume.addEventListener('input', () => { affSlider.value = Math.min(affVolume.value, 500000); updateAffiliate(); });
+  affSlider.addEventListener('input', () => { affVolume.value = affSlider.value; updateAffiliate(); });
+  document.querySelectorAll('.aff-preset').forEach(b => {
+    b.addEventListener('click', () => {
+      affVolume.value = b.dataset.val;
+      affSlider.value = Math.min(b.dataset.val, 500000);
+      updateAffiliate();
+    });
+  });
+
+  /* Affiliate stacked bar chart */
+  const affCtx = document.getElementById('affChart').getContext('2d');
+  chartTheme = getChartThemeColors();
+  const affChart = new Chart(affCtx, {
+    type: 'bar',
+    data: {
+      labels: ['$10,000 Sales', '$50,000 Sales', '$100,000 Sales'],
+      datasets: [
+        { label: 'Single 15%', data: [1500, 7500, 15000], backgroundColor: chartTheme.moss, borderRadius: 2 },
+        { label: 'Recurring 10%', data: [1000, 5000, 10000], backgroundColor: chartTheme.gold, borderRadius: 2 },
+        { label: 'Bulk 8%', data: [800, 4000, 8000], backgroundColor: chartTheme.slate, borderRadius: 2 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: chartTheme.muted, font: { family: 'JetBrains Mono', size: 10 }, boxWidth: 10, boxHeight: 10 }
+        },
+        tooltip: {
+          ...chartTooltipOptions(),
+          callbacks: { label: (c) => '  ' + c.dataset.label + ': $' + c.parsed.y.toLocaleString('en-US') }
+        }
+      },
+      scales: {
+        x: {
+          ticks: chartScaleColors().tick,
+          grid: { display: false }
+        },
+        y: {
+          ticks: { ...chartScaleColors().tick, callback: (v) => '$' + v.toLocaleString('en-US') },
+          grid: { color: chartTheme.border }
+        }
+      }
+    }
+  });
+
+  /* ============================================================
+     [06] FRANCHISE ROI
+     ============================================================ */
+  const frTier = document.getElementById('fr-tier');
+  const frMarket = document.getElementById('fr-market');
+  const frRevenue = document.getElementById('fr-revenue');
+  const frFee = document.getElementById('fr-fee');
+  const frBuild = document.getElementById('fr-build');
+  const frWc = document.getElementById('fr-wc');
+  const frUpfront = document.getElementById('fr-upfront');
+  const frRoyalty = document.getElementById('fr-royalty');
+  const frMarketing = document.getElementById('fr-marketing');
+  const frProfit = document.getElementById('fr-profit');
+  const frPayback = document.getElementById('fr-payback');
+
+  function updateFranchise() {
+    const tier = frTier.value; // exclusive | non
+    const mkt = frMarket.value;
+    const rev = parseFloat(frRevenue.value) || 0;
+
+    // Fee ranges
+    const feeRanges = {
+      exclusive: { small: 35000, medium: 55000, large: 75000 },
+      non: { small: 15000, medium: 20000, large: 25000 }
+    };
+    // Buildout & WC
+    const buildRanges = { small: 80000, medium: 115000, large: 150000 };
+    const wcRanges = { small: 30000, medium: 40000, large: 50000 };
+
+    const fee = feeRanges[tier][mkt];
+    const build = buildRanges[mkt];
+    const wc = wcRanges[mkt];
+    const upfront = fee + build + wc;
+    const royalty = rev * 0.06;
+    const mktFee = rev * 0.02;
+    // Assume franchisee net margin ~25% of revenue before royalties — illustrative
+    const grossOp = rev * 0.30;
+    const profit = grossOp - royalty - mktFee;
+    const payback = profit > 0 ? Math.ceil(upfront / profit) : Infinity;
+
+    frFee.textContent = fmtFull(fee);
+    frBuild.textContent = fmtFull(build);
+    frWc.textContent = fmtFull(wc);
+    frUpfront.textContent = fmtFull(upfront);
+    frRoyalty.textContent = fmtFull(royalty);
+    frMarketing.textContent = fmtFull(mktFee);
+    frProfit.textContent = fmtFull(profit);
+    frPayback.textContent = isFinite(payback) ? payback + ' mo' : '—';
+  }
+  [frTier, frMarket, frRevenue].forEach(el => el.addEventListener('input', updateFranchise));
+  [frTier, frMarket].forEach(el => el.addEventListener('change', updateFranchise));
+  updateFranchise();
+
+  /* ============================================================
+     [07] MARKET GROWTH CHART
+     ============================================================ */
+  const marketCtx = document.getElementById('marketChart').getContext('2d');
+  chartTheme = getChartThemeColors();
+
+  const marketChart = new Chart(marketCtx, {
+    type: 'bar',
+    data: {
+      labels: ['2024', '2025', '2026', '2027', '2028', '2029'],
+      datasets: [{
+        label: 'Global Skincare Market',
+        data: [200, 213, 226, 240, 255, 272],
+        backgroundColor: makeMarketGradient(marketCtx, 260),
+        borderColor: chartTheme.moss,
+        borderWidth: 1,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...chartTooltipOptions(),
+          displayColors: false,
+          callbacks: { label: (c) => '  $' + c.parsed.y + 'B' }
+        }
+      },
+      scales: {
+        x: { ticks: chartScaleColors().tick, grid: { display: false } },
+        y: { ticks: { ...chartScaleColors().tick, callback: (v) => '$' + v + 'B' }, grid: { color: chartTheme.border } }
+      }
+    }
+  });
+
+  function applyChartTheme() {
+    const c = getChartThemeColors();
+    const tip = chartTooltipOptions();
+    const scale = chartScaleColors();
+
+    revenueChart.data.datasets[0].borderColor = c.moss;
+    revenueChart.data.datasets[0].backgroundColor = makeRevenueGradient(revenueCtx, 340);
+    revenueChart.data.datasets[0].pointBackgroundColor = c.bg;
+    revenueChart.data.datasets[0].pointBorderColor = c.moss;
+    Object.assign(revenueChart.options.plugins.tooltip, tip);
+    revenueChart.options.scales.x.ticks = scale.tick;
+    revenueChart.options.scales.x.grid.color = c.border;
+    revenueChart.options.scales.y.ticks = { ...scale.tick, callback: (v) => fmt(v) };
+    revenueChart.options.scales.y.grid.color = c.border;
+    revenueChart.update();
+
+    affChart.data.datasets[0].backgroundColor = c.moss;
+    affChart.data.datasets[1].backgroundColor = c.gold;
+    affChart.data.datasets[2].backgroundColor = c.slate;
+    affChart.options.plugins.legend.labels.color = c.muted;
+    Object.assign(affChart.options.plugins.tooltip, tip);
+    affChart.options.scales.x.ticks = scale.tick;
+    affChart.options.scales.y.ticks = { ...scale.tick, callback: (v) => '$' + v.toLocaleString('en-US') };
+    affChart.options.scales.y.grid.color = c.border;
+    affChart.update();
+
+    marketChart.data.datasets[0].backgroundColor = makeMarketGradient(marketCtx, 260);
+    marketChart.data.datasets[0].borderColor = c.moss;
+    Object.assign(marketChart.options.plugins.tooltip, tip);
+    marketChart.options.scales.x.ticks = scale.tick;
+    marketChart.options.scales.y.ticks = { ...scale.tick, callback: (v) => '$' + v + 'B' };
+    marketChart.options.scales.y.grid.color = c.border;
+    marketChart.update();
+  }
+
+  let chartResizeTimer;
+  function resizeCharts() {
+    [revenueChart, affChart, marketChart].forEach(chart => chart.resize());
+  }
+  window.addEventListener('resize', () => {
+    clearTimeout(chartResizeTimer);
+    chartResizeTimer = setTimeout(resizeCharts, 150);
+  });
+
+  /* ============================================================
+     [09] CSR CALCULATOR
+     ============================================================ */
+  const csrRevenue = document.getElementById('csr-revenue');
+  const csrOutput = document.getElementById('csr-output');
+  const csrEvents = document.getElementById('csr-events');
+  function updateCsr() {
+    const r = parseFloat(csrRevenue.value) || 0;
+    const allocation = r * 0.02;
+    csrOutput.textContent = fmtFull(allocation);
+    // Assume $3K – $5K per event
+    const low = Math.floor(allocation / 5000);
+    const high = Math.floor(allocation / 3000);
+    csrEvents.textContent = `~${low} – ${high}`;
+  }
+  csrRevenue.addEventListener('input', updateCsr);
+  updateCsr();
+
+  /* ============================================================
+     [10] EXIT ESTIMATOR
+     ============================================================ */
+  const exArr = document.getElementById('ex-arr');
+  const exMult = document.getElementById('ex-mult');
+  const exMultLabel = document.getElementById('ex-mult-label');
+  const exOutput = document.getElementById('ex-output');
+  const exDetail = document.getElementById('ex-detail');
+  const exLow = document.getElementById('ex-low');
+  const exHigh = document.getElementById('ex-high');
+
+  function updateExit() {
+    const arr = parseFloat(exArr.value) || 0;
+    const m = parseFloat(exMult.value);
+    exMultLabel.textContent = m.toFixed(1) + '×';
+    const value = arr * m;
+    exOutput.textContent = fmt(value, 1);
+    exDetail.textContent = fmt(arr, 1) + ' ARR × ' + m.toFixed(1) + '× MULTIPLE';
+    exLow.textContent = fmt(arr * 3, 1);
+    exHigh.textContent = fmt(arr * 6, 1);
+  }
+  exArr.addEventListener('input', updateExit);
+  exMult.addEventListener('input', updateExit);
+  document.querySelectorAll('.ex-preset').forEach(b => {
+    b.addEventListener('click', () => { exArr.value = b.dataset.arr; updateExit(); });
+  });
+  updateExit();
+
+  /* ============================================================
+     Animated counters for KPI tiles (first viewport)
+     ============================================================ */
+  const counters = document.querySelectorAll('[data-counter]');
+  const cObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = parseFloat(el.dataset.counter);
+        const suffix = el.dataset.suffix || '';
+        const prefix = el.dataset.prefix || '';
+        let cur = 0;
+        const dur = 1200;
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min(1, (now - start) / dur);
+          const eased = 1 - Math.pow(1 - t, 3);
+          cur = target * eased;
+          el.textContent = prefix + cur.toFixed(0) + suffix;
+          if (t < 1) requestAnimationFrame(tick);
+          else el.textContent = prefix + target + suffix;
+        }
+        requestAnimationFrame(tick);
+        cObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.4 });
+  counters.forEach(c => cObs.observe(c));
+
+</script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>
