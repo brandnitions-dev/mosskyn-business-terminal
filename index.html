@@ -1152,8 +1152,8 @@
               <input type="number" id="aff-sales" min="0" step="1" value="25"/>
               <div class="mt-3 grid gap-2 font-mono text-[10.5px]">
                 <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">1 – 50 sales</span><span class="text-moss">5% commission</span></div>
-                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">51 – 99 sales</span><span class="text-moss">10% commission</span></div>
-                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">100+ sales</span><span class="text-moss">15% commission</span></div>
+                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">51 – 100 sales</span><span class="text-moss">10% commission</span></div>
+                <div class="flex justify-between border border-border px-3 py-2"><span class="text-muted">101+ sales</span><span class="text-moss">15% commission</span></div>
               </div>
               <div class="mt-2 font-mono text-[10.5px] text-muted">Active tier: <span id="aff-tier-label" class="text-bone">1 – 50 · 5%</span></div>
               <div class="font-mono text-[10.5px] text-gold/90 mt-1">↻ Tier resets every 3 months · <span id="aff-reset-label">next reset</span></div>
@@ -1973,8 +1973,8 @@
 
   function getAffiliateTier(salesCount) {
     const n = parseInt(salesCount, 10) || 0;
-    if (n >= 100) return { rate: 0.15, label: '100+ · 15%', range: '100+ sales' };
-    if (n > 50) return { rate: 0.10, label: '51 – 99 · 10%', range: '51 – 99 sales' };
+    if (n >= 101) return { rate: 0.15, label: '101+ · 15%', range: '101+ sales' };
+    if (n > 50) return { rate: 0.10, label: '51 – 100 · 10%', range: '51 – 100 sales' };
     return { rate: 0.05, label: '1 – 50 · 5%', range: '1 – 50 sales' };
   }
 
@@ -2024,7 +2024,7 @@
   const affChart = new Chart(affCtx, {
     type: 'bar',
     data: {
-      labels: ['5% · 1–50', '10% · 51–99', '15% · 100+'],
+      labels: ['5% · 1–50', '10% · 51–100', '15% · 101+'],
       datasets: [{
         label: 'Commission on $10K revenue',
         data: [500, 1000, 1500],
